@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accedi - Agenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    (function(){
+        var t=localStorage.getItem('agenda-theme');
+        if(t) document.documentElement.setAttribute('data-theme',t);
+        else if(window.matchMedia('(prefers-color-scheme:dark)').matches)
+            document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
+</head>
+<body class="min-h-screen bg-base-200">
+
+    <section class="auth-container">
+        <div class="auth-card">
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h1 class="text-3xl font-bold text-center flex items-center justify-center gap-2">
+                        <i class="fas fa-calendar-alt text-primary"></i>
+                        <span>Agenda</span>
+                    </h1>
+                    <p class="text-center text-base-content/60 mb-2">Accedi al tuo account</p>
+
+                    <form id="form-login">
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Username</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-user text-base-content/40"></i>
+                                <input type="text" name="username" placeholder="Il tuo username" required class="grow">
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Password</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-lock text-base-content/40"></i>
+                                <input type="password" name="password" placeholder="La tua password" required class="grow">
+                            </label>
+                        </div>
+
+                        <div class="mt-5">
+                            <button type="submit" class="btn btn-primary w-full" id="btn-login">
+                                Accedi
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="text-center mt-4 text-sm">
+                        Non hai un account? <a href="register.html" class="link link-primary">Registrati</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appuntamento - Agenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    (function(){
+        var t=localStorage.getItem('agenda-theme');
+        if(t) document.documentElement.setAttribute('data-theme',t);
+        else if(window.matchMedia('(prefers-color-scheme:dark)').matches)
+            document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col">
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <div class="navbar bg-base-100 shadow-sm">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="dashboard.html"><i class="fas fa-home mr-2"></i>Dashboard</a></li>
+                    <li><a href="calendario.html"><i class="fas fa-calendar mr-2"></i>Calendario</a></li>
+                    <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-2"></i>Statistiche</a></li>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-lg" href="dashboard.html">
+                <i class="fas fa-calendar-alt"></i> Agenda
+            </a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="dashboard.html"><i class="fas fa-home mr-1"></i>Dashboard</a></li>
+                <li><a href="calendario.html"><i class="fas fa-calendar mr-1"></i>Calendario</a></li>
+                <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-1"></i>Statistiche</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end gap-1">
+            <button class="btn btn-ghost btn-circle" id="btn-theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    <span id="navbar-user-name">Utente</span>
+                    <i class="fas fa-chevron-down text-xs ml-1"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="profilo.html"><i class="fas fa-user-edit mr-2"></i>Profilo</a></li>
+                    <li><hr class="my-1"></li>
+                    <li><a href="#" id="btn-logout"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENUTO ===== -->
+    <main class="flex-1 container mx-auto px-4 py-6" style="max-width:700px">
+
+        <a href="calendario.html" class="btn btn-ghost btn-sm mb-4">
+            <i class="fas fa-arrow-left"></i> Torna al calendario
+        </a>
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <h2 class="card-title">
+                        <i class="fas fa-users text-success"></i>
+                        Dettaglio Appuntamento
+                    </h2>
+                    <span class="badge badge-warning" id="readonly-badge" style="display:none">Solo lettura</span>
+                </div>
+
+                <form id="form-appuntamento" class="mt-4">
+                    <div class="form-control w-full mb-3">
+                        <label class="label"><span class="label-text">Descrizione</span></label>
+                        <textarea class="textarea textarea-bordered w-full" name="descrizione" required></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3 mb-3">
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Data</span></label>
+                            <input class="input input-bordered w-full" type="date" name="data" required>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Ora</span></label>
+                            <input class="input input-bordered w-full" type="time" name="ora" required>
+                        </div>
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">Durata (min)</span></label>
+                            <input class="input input-bordered w-full" type="number" name="durata_minuti" min="1">
+                        </div>
+                    </div>
+
+                    <!-- Partecipanti -->
+                    <div class="form-control w-full mb-3">
+                        <label class="label"><span class="label-text">Partecipanti</span></label>
+                        <div class="tags-input" id="partecipanti-tags"></div>
+                        <div class="mt-2 relative" id="picker-container">
+                            <input class="input input-bordered input-sm w-full" type="text" id="partecipanti-search" placeholder="Cerca persona da aggiungere...">
+                            <div id="partecipanti-dropdown" style="display:none"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stato disponibilità -->
+                    <div id="disponibilita-status" style="display:none"></div>
+
+                    <!-- Bottoni (solo per creatore) -->
+                    <div class="flex gap-3 mt-5" id="action-buttons">
+                        <button type="submit" class="btn btn-success" id="btn-save">
+                            <i class="fas fa-save"></i> Salva modifiche
+                        </button>
+                        <button type="button" class="btn btn-error btn-outline" id="btn-delete">
+                            <i class="fas fa-trash"></i> Elimina
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/locale/it.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/api.js"></script>
+    <script src="js/appuntamento.js"></script>
+</body>
+</html>

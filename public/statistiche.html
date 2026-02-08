@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiche - Agenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    (function(){
+        var t=localStorage.getItem('agenda-theme');
+        if(t) document.documentElement.setAttribute('data-theme',t);
+        else if(window.matchMedia('(prefers-color-scheme:dark)').matches)
+            document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col">
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <div class="navbar bg-base-100 shadow-sm">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="dashboard.html"><i class="fas fa-home mr-2"></i>Dashboard</a></li>
+                    <li><a href="calendario.html"><i class="fas fa-calendar mr-2"></i>Calendario</a></li>
+                    <li><a href="statistiche.html" class="active"><i class="fas fa-chart-pie mr-2"></i>Statistiche</a></li>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-lg" href="dashboard.html">
+                <i class="fas fa-calendar-alt"></i> Agenda
+            </a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="dashboard.html"><i class="fas fa-home mr-1"></i>Dashboard</a></li>
+                <li><a href="calendario.html"><i class="fas fa-calendar mr-1"></i>Calendario</a></li>
+                <li><a href="statistiche.html" class="active"><i class="fas fa-chart-pie mr-1"></i>Statistiche</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end gap-1">
+            <button class="btn btn-ghost btn-circle" id="btn-theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    <span id="navbar-user-name">Utente</span>
+                    <i class="fas fa-chevron-down text-xs ml-1"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="profilo.html"><i class="fas fa-user-edit mr-2"></i>Profilo</a></li>
+                    <li><hr class="my-1"></li>
+                    <li><a href="#" id="btn-logout"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENUTO ===== -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-chart-bar"></i> Statistiche
+        </h2>
+
+        <!-- Selettore anno -->
+        <div class="flex items-center gap-3 mb-6">
+            <label class="text-sm font-medium">Anno</label>
+            <select class="select select-bordered select-sm" id="select-anno"></select>
+            <button class="btn btn-info btn-sm" id="btn-carica">
+                <i class="fas fa-sync-alt"></i> Aggiorna
+            </button>
+        </div>
+
+        <!-- Riepilogo numerico - 4 box -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="riepilogo">
+            <div class="card bg-base-100 shadow text-center">
+                <div class="card-body py-4">
+                    <p class="text-xs uppercase tracking-wide text-base-content/50">Promemoria creati</p>
+                    <p class="text-3xl font-bold text-info" id="stat-prom-unique">-</p>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow text-center">
+                <div class="card-body py-4">
+                    <p class="text-xs uppercase tracking-wide text-base-content/50">Occorrenze totali</p>
+                    <p class="text-3xl font-bold text-info/70" id="stat-prom-occurrences">-</p>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow text-center">
+                <div class="card-body py-4">
+                    <p class="text-xs uppercase tracking-wide text-base-content/50">Appuntamenti</p>
+                    <p class="text-3xl font-bold text-success" id="stat-app-count">-</p>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow text-center">
+                <div class="card-body py-4">
+                    <p class="text-xs uppercase tracking-wide text-base-content/50">Totale eventi</p>
+                    <p class="text-3xl font-bold" id="stat-total-count">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafici -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="text-base font-semibold text-center mb-2">Distribuzione Eventi</h3>
+                    <canvas id="chart-distribuzione"></canvas>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h3 class="text-base font-semibold text-center mb-2">Andamento Mensile</h3>
+                    <canvas id="chart-mensile"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/locale/it.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/statistiche.js"></script>
+</body>
+</html>

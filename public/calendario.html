@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario - Agenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    (function(){
+        var t=localStorage.getItem('agenda-theme');
+        if(t) document.documentElement.setAttribute('data-theme',t);
+        else if(window.matchMedia('(prefers-color-scheme:dark)').matches)
+            document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col">
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <div class="navbar bg-base-100 shadow-sm">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="dashboard.html"><i class="fas fa-home mr-2"></i>Dashboard</a></li>
+                    <li><a href="calendario.html" class="active"><i class="fas fa-calendar mr-2"></i>Calendario</a></li>
+                    <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-2"></i>Statistiche</a></li>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-lg" href="dashboard.html">
+                <i class="fas fa-calendar-alt"></i> Agenda
+            </a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="dashboard.html"><i class="fas fa-home mr-1"></i>Dashboard</a></li>
+                <li><a href="calendario.html" class="active"><i class="fas fa-calendar mr-1"></i>Calendario</a></li>
+                <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-1"></i>Statistiche</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end gap-1">
+            <button class="btn btn-ghost btn-circle" id="btn-theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    <span id="navbar-user-name">Utente</span>
+                    <i class="fas fa-chevron-down text-xs ml-1"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="profilo.html"><i class="fas fa-user-edit mr-2"></i>Profilo</a></li>
+                    <li><hr class="my-1"></li>
+                    <li><a href="#" id="btn-logout"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENUTO PRINCIPALE ===== -->
+    <section class="main-content flex-1">
+
+        <!-- Legenda + Bottoni creazione -->
+        <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-dot promemoria"></span> Promemoria
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot appuntamento"></span> Appuntamento
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-info" id="btn-new-promemoria">
+                    <i class="fas fa-sticky-note"></i> Promemoria
+                </button>
+                <button class="btn btn-success" id="btn-new-appuntamento">
+                    <i class="fas fa-users"></i> Appuntamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Calendario FullCalendar -->
+        <div id="calendar" class="bg-base-100 shadow rounded-xl p-4"></div>
+
+        <!-- ===== PANNELLO LISTA EVENTI ===== -->
+        <div class="card bg-base-100 shadow mt-6">
+            <div class="card-body">
+                <h3 class="text-lg font-semibold mb-3">Lista Eventi</h3>
+
+                <!-- Filtri -->
+                <div class="flex flex-wrap items-end gap-3 mb-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text text-xs">Da</span></label>
+                        <input class="input input-bordered input-sm" type="date" id="filtro-da">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text text-xs">A</span></label>
+                        <input class="input input-bordered input-sm" type="date" id="filtro-a">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text text-xs">Tipo</span></label>
+                        <select class="select select-bordered select-sm" id="filtro-tipo">
+                            <option value="tutti">Tutti</option>
+                            <option value="promemoria">Promemoria</option>
+                            <option value="appuntamenti">Appuntamenti</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-info btn-sm" id="btn-filtra">
+                        <i class="fas fa-filter"></i> Filtra
+                    </button>
+                </div>
+
+                <!-- Tabella eventi -->
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descrizione</th>
+                                <th>Data</th>
+                                <th>Ora</th>
+                                <th>Durata</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center text-base-content/50">
+                                    Nessun evento nel periodo selezionato
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ===== MODALE NUOVO PROMEMORIA ===== -->
+    <dialog id="modal-promemoria" class="modal">
+        <div class="modal-box w-11/12 max-w-xl">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">&times;</button>
+            </form>
+            <h3 class="text-lg font-bold mb-4">Nuovo Promemoria</h3>
+
+            <form id="form-promemoria">
+                <div class="form-control w-full mb-3">
+                    <label class="label"><span class="label-text">Descrizione *</span></label>
+                    <textarea class="textarea textarea-bordered w-full" name="descrizione" placeholder="Descrizione del promemoria" required></textarea>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Data *</span></label>
+                        <input class="input input-bordered w-full" type="date" name="data_inizio" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Ora</span></label>
+                        <input class="input input-bordered w-full" type="time" name="ora">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Durata (min)</span></label>
+                        <input class="input input-bordered w-full" type="number" name="durata_minuti" min="1" placeholder="60">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Ricorrenza</span></label>
+                        <select class="select select-bordered w-full" name="ricorrenza" id="prom-ricorrenza">
+                            <option value="nessuna">Nessuna</option>
+                            <option value="settimanale">Settimanale</option>
+                            <option value="mensile">Mensile</option>
+                            <option value="annuale">Annuale</option>
+                        </select>
+                    </div>
+                    <div class="form-control field-ricorrenza-fine" style="display:none">
+                        <label class="label"><span class="label-text">Fine ricorrenza</span></label>
+                        <input class="input input-bordered w-full" type="date" name="ricorrenza_fine">
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-action">
+                <button class="btn btn-primary" id="btn-save-promemoria">
+                    <i class="fas fa-save"></i> Salva
+                </button>
+                <form method="dialog"><button class="btn">Annulla</button></form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- ===== MODALE NUOVO APPUNTAMENTO ===== -->
+    <dialog id="modal-appuntamento" class="modal">
+        <div class="modal-box w-11/12 max-w-xl">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">&times;</button>
+            </form>
+            <h3 class="text-lg font-bold mb-4">Nuovo Appuntamento</h3>
+
+            <form id="form-appuntamento">
+                <div class="form-control w-full mb-3">
+                    <label class="label"><span class="label-text">Descrizione *</span></label>
+                    <textarea class="textarea textarea-bordered w-full" name="descrizione" placeholder="Descrizione dell'appuntamento" required></textarea>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Data *</span></label>
+                        <input class="input input-bordered w-full" type="date" name="data" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Ora *</span></label>
+                        <input class="input input-bordered w-full" type="time" name="ora" required>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Durata (min)</span></label>
+                        <input class="input input-bordered w-full" type="number" name="durata_minuti" min="1" value="60">
+                    </div>
+                </div>
+
+                <!-- Participant Picker -->
+                <div class="form-control w-full mb-3">
+                    <label class="label"><span class="label-text">Partecipanti</span></label>
+                    <div class="tags-input" id="partecipanti-tags"></div>
+                    <div class="mt-2 relative">
+                        <input class="input input-bordered input-sm w-full" type="text" id="partecipanti-search" placeholder="Cerca persona da aggiungere...">
+                        <div id="partecipanti-dropdown" style="display:none"></div>
+                    </div>
+                </div>
+
+                <!-- Stato disponibilità -->
+                <div id="disponibilita-status" style="display:none"></div>
+            </form>
+
+            <div class="modal-action">
+                <button class="btn btn-success" id="btn-save-appuntamento">
+                    <i class="fas fa-save"></i> Salva
+                </button>
+                <form method="dialog"><button class="btn">Annulla</button></form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/locale/it.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/locales/it.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/api.js"></script>
+    <script src="js/calendario.js"></script>
+</body>
+</html>

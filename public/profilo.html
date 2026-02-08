@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo - Agenda</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+    (function(){
+        var t=localStorage.getItem('agenda-theme');
+        if(t) document.documentElement.setAttribute('data-theme',t);
+        else if(window.matchMedia('(prefers-color-scheme:dark)').matches)
+            document.documentElement.setAttribute('data-theme','dark');
+    })();
+    </script>
+</head>
+<body class="min-h-screen bg-base-200 flex flex-col">
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+
+    <!-- ===== NAVBAR ===== -->
+    <div class="navbar bg-base-100 shadow-sm">
+        <div class="navbar-start">
+            <div class="dropdown">
+                <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="dashboard.html"><i class="fas fa-home mr-2"></i>Dashboard</a></li>
+                    <li><a href="calendario.html"><i class="fas fa-calendar mr-2"></i>Calendario</a></li>
+                    <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-2"></i>Statistiche</a></li>
+                </ul>
+            </div>
+            <a class="btn btn-ghost text-lg" href="dashboard.html">
+                <i class="fas fa-calendar-alt"></i> Agenda
+            </a>
+        </div>
+        <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+                <li><a href="dashboard.html"><i class="fas fa-home mr-1"></i>Dashboard</a></li>
+                <li><a href="calendario.html"><i class="fas fa-calendar mr-1"></i>Calendario</a></li>
+                <li><a href="statistiche.html"><i class="fas fa-chart-pie mr-1"></i>Statistiche</a></li>
+            </ul>
+        </div>
+        <div class="navbar-end gap-1">
+            <button class="btn btn-ghost btn-circle" id="btn-theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost">
+                    <i class="fas fa-user-circle mr-1"></i>
+                    <span id="navbar-user-name">Utente</span>
+                    <i class="fas fa-chevron-down text-xs ml-1"></i>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                    <li><a href="profilo.html"><i class="fas fa-user-edit mr-2"></i>Profilo</a></li>
+                    <li><hr class="my-1"></li>
+                    <li><a href="#" id="btn-logout"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENUTO ===== -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <div class="profile-card">
+            <div class="card bg-base-100 shadow">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-circle"></i>
+                        Il Mio Profilo
+                    </h2>
+
+                    <form id="form-profilo" class="mt-4">
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div class="form-control">
+                                <label class="label"><span class="label-text">Nome</span></label>
+                                <label class="input input-bordered flex items-center gap-2">
+                                    <i class="fas fa-user text-base-content/40"></i>
+                                    <input type="text" name="nome" required class="grow">
+                                </label>
+                            </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text">Cognome</span></label>
+                                <label class="input input-bordered flex items-center gap-2">
+                                    <i class="fas fa-user text-base-content/40"></i>
+                                    <input type="text" name="cognome" required class="grow">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Email</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-envelope text-base-content/40"></i>
+                                <input type="email" name="email" required class="grow">
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Telefono</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-phone text-base-content/40"></i>
+                                <input type="tel" name="telefono" class="grow">
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Username</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-at text-base-content/40"></i>
+                                <input type="text" name="username" disabled class="grow">
+                            </label>
+                            <label class="label"><span class="label-text-alt text-base-content/50">Lo username non può essere modificato.</span></label>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label"><span class="label-text">Password corrente *</span></label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-lock text-base-content/40"></i>
+                                <input type="password" name="password_corrente" placeholder="Richiesta per confermare le modifiche" required class="grow">
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full mb-3">
+                            <label class="label">
+                                <span class="label-text">Nuova password <span class="text-base-content/40">(opzionale)</span></span>
+                            </label>
+                            <label class="input input-bordered flex items-center gap-2">
+                                <i class="fas fa-key text-base-content/40"></i>
+                                <input type="password" name="nuova_password" placeholder="Lascia vuoto per non cambiarla" minlength="6" class="grow">
+                            </label>
+                        </div>
+
+                        <div class="mt-5">
+                            <button type="submit" class="btn btn-primary" id="btn-save">
+                                <i class="fas fa-save"></i> Salva modifiche
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/api.js"></script>
+    <script src="js/profilo.js"></script>
+</body>
+</html>
