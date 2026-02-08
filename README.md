@@ -39,9 +39,9 @@ Applicazione web per la gestione condivisa di appuntamenti e promemoria personal
    git clone https://github.com/camillodellacorte/agenda.git
    ```
 
-2. Apri phpMyAdmin (`http://localhost/phpmyadmin`) e importa lo schema del database:
-   - Importa il file `SchemaPerMySQL.sql` (crea il database "Agenda" e le tabelle)
-   - Importa il file `public/DatiPerMySQL.sql` (inserisce dati di esempio)
+2. Apri la schell di xampp da xampp control panel e incolla lo schema del database:
+   - Incolla il file `SchemaPerMySQL.sql` (crea il database "Agenda" e le tabelle)
+   - Incolla il file `public/DatiPerMySQL.sql` (popola il database con dati di esempio)
 
 3. Apri il browser e vai a:
    ```
